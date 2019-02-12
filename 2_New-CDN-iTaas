@@ -1,0 +1,67 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+ 
+namespace AgileContent2
+{
+    class Solution
+    {
+        static public void Run(string inputPath, string outputPath)
+        {
+            Console.WriteLine("Checkin output dir " + Path.GetDirectoryName(outputPath));
+ 
+            //Create output dir, if it doesn't exist yet
+            if(!Directory.Exists(Path.GetDirectoryName(outputPath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            }
+ 
+            //Download file
+            Console.WriteLine("Downloading from " + inputPath);
+ 
+            using (var client = new WebClient())
+            {
+                client.DownloadFile(inputPath, Path.ChangeExtension(outputPath, "tmp"));
+            }
+ 
+            //Read file into a list of events
+            Console.WriteLine("Reading downloaded file");
+ 
+            List<string[]> fileLines = new List<string[]>();
+ 
+            using (StreamReader reader = new StreamReader(Path.ChangeExtension(outputPath, "tmp")))
+            {
+                while (!reader.EndOfStream)
+                {
+                    fileLines.Add(reader.ReadLine().Split(new char[] { '|', '"', ' '}, StringSplitOptions.RemoveEmptyEntries));
+                }
+            }
+ 
+            //Save new file, already in the right format
+            Console.WriteLine("Saving new file");
+            using (StreamWriter writer = new StreamWriter(outputPath))
+            {
+                //HEADER
+                writer.WriteLine("#Version: 1.0");
+                writer.WriteLine("#Date: " + DateTime.Now.ToString());
+                writer.WriteLine("#Fields: provider http-method status-code uri-path time-taken response-size cache-status");
+                writer.WriteLine("");
+ 
+                //BODY
+                foreach(var i in fileLines)
+                {
+                    float time = float.Parse(i[6], CultureInfo.InvariantCulture);
+ 
+                    string cacheStatus = i[2] == "INVALIDATE" ? "REFRESH_HIT" : i[2];
+ 
+                    writer.WriteLine("\"MINHA CDN\" " + i[3] + " " + i[1] + " " + i[4] + " " + time.ToString("0.") + " " + i[0] + " " + cacheStatus);
+                }
+            }
+        }
+    }
+}
