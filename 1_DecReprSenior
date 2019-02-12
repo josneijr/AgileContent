@@ -15,9 +15,16 @@ public class Program
 		
 		digits.Sort();
 		
-		for(int i=digits.Count-1; i>=0; i--) {
+		for(int i=digits.Count-1; i>=0; i--) 
+		{
 			number = number*10 + digits[i];
 		}
+		
+		if(number>100000000)
+		{
+			return -1;
+		}
+		
 		
 		return number;
 	}
@@ -26,14 +33,18 @@ public class Program
 	{
 		int teste1 = 213;
 		int teste2 = 553;
+		int teste3 = 999999999;
 		
 		int result1 = 321;
 		int result2 = 553;
+		int result3 = -1;
 		
 		int calc1 = solution(teste1);
 		int calc2 = solution(teste2);
+		int calc3 = solution(teste3);
 		
 		Console.WriteLine("Teste1: " + calc1.ToString() + " - " + (calc1 == result1).ToString());
 		Console.WriteLine("Teste2: " + calc2.ToString() + " - " + (calc2 == result2).ToString());
+		Console.WriteLine("Teste3: " + calc3.ToString() + " - " + (calc3 == result3).ToString());
 	}
 }
